@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#déclaration des variable
-#modifier todo pour changer le path du fichier (e.g. $HOME/todo)
+#declaring variables
+#modify todo to change path of the file (e.g. $HOME/todo)
 todo=$HOME/.todo
-jour=$(date +%Y-%m-%d)
-jour=$(date -d $jour +%s)
-annee=$(date +%Y)
+today=$(date +%Y-%m-%d)
+day=$(date -d $today +%s)
+year=$(date +%Y)
 
-#déclaration des fonctions
+#defining all the functions used
 banner()
 {
 	printf "`tput bold ; tput setaf 3 ; tput smso`%-s`tput sgr0`\n" "$@"
@@ -20,13 +20,13 @@ question()
 
 update()
 {
-	for value in $(grep $annee $todo | cut -c2-11 )
+	for value in $(grep $year $todo | cut -c2-11 )
 	do
-		valuetest=$(($(date -d $value +%s) - $jour)) 
+		valuetest=$(($(date -d $value +%s) - $day)) 
 		if [ $valuetest -eq 0 ]
 		then
 			ligne=$(grep -n $value $todo | cut -c1-1)
-			$(sed -i "$ligne"'i (date du jour)' $todo)
+			$(sed -i "$ligne"'i (today)' $todo)
 			if [ $ligne -gt 1 ]
 			then
 				$(sed -i "$ligne"',$!d' $todo)
@@ -35,7 +35,7 @@ update()
 		elif [ $valuetest -gt 0 ]
 		then
 			ligne=$(grep -n $value $todo | cut -c1-1)
-			$(sed -i "$ligne"'i (jours à venir)' $todo)
+			$(sed -i "$ligne"'i (days to come)' $todo)
 			if [ $ligne -gt 1 ]
 			then
 				$(sed -i "$ligne"',$!d' $todo)
@@ -45,24 +45,24 @@ update()
 	done
 }
 
-afficher()
+show()
 {
 banner "To do list."
 cat $todo
 }
 
-faire()
+what()
 {
 	echo
-	question "Que faire ?" "(a)jouter, (m)odifier, (*)quitter"
+	question "What do ?" "(a)dd, (m)odify, (*)exit"
 	read modif
 	
 	case $modif in
 		a)
-			ajout
+			add
 			;;
 		m)
-			modifier
+			modify
 			;;
 		*)
 			exit
@@ -70,38 +70,38 @@ faire()
 	esac
 }
 
-ajout()
+add()
 {
-	clear
-	afficher
-	banner "Ajout d'un évenement."
-	question "Date limite ?(MM-JJ)"
-	read limite
-	limite=$annee-$limite
-	diff=$(($(date -d $limite +%s) - $jour))
+	 
+	show
+	banner "Adding an event ."
+	question "Limit date ?(MM-DD)"
+	read limit
+	limit=$year-$limit
+	diff=$(($(date -d $limit +%s) - $day))
 
 	if [ $diff -lt 0 ]
 	then
-		limite=$(date -d $limite+"1 year" +%Y-%m-%d)
+		limit=$(date -d $limit+"1 year" +%Y-%m-%d)
 	fi
 
 	echo
-	question "Événement à ajouter ?"
+	question "Event to add ?"
 	read addtolist
-	read -d '' -r -a listedate <<< $(grep -F "[" $todo | cut -c2-11 )
-	dernieredate=${listedate[-1]}
-	diffddate=$(( $(date -d $dernieredate +%s) - $(date -d $limite +%s) ))
+	read -d '' -r -a listdate <<< $(grep -F "[" $todo | cut -c2-11 )
+	lastdate=${listdate[-1]}
+	diffddate=$(( $(date -d $lastdate +%s) - $(date -d $limit +%s) ))
 	if [ $diffddate -lt 0 ]
 	then
-		$(sed -i '$a'"[$limite]\n-$addtolist" $todo)
+		$(sed -i '$a'"[$limit]\n-$addtolist" $todo)
 	else
-		for value in ${listedate[@]}
+		for value in ${listdate[@]}
 		do
-			valuetest=$(( $(date -d $value +%s) - $(date -d $limite +%s) )) 
+			valuetest=$(( $(date -d $value +%s) - $(date -d $limit +%s) )) 
 			if [ $valuetest -gt 0 ]
 			then
 				ligne=$(grep -n $value $todo | awk -F ':' '{print $1}')
-				$(sed -i "$ligne"'i'"[$limite]\n-$addtolist" $todo)
+				$(sed -i "$ligne"'i'"[$limit]\n-$addtolist" $todo)
 				break
 			elif [ $valuetest -eq 0 ]
 			then
@@ -112,36 +112,43 @@ ajout()
 		done
 	fi
 	
-	clear
-	banner "Événement ajouté."
-	afficher
-	faire
+	 
+	banner "Event added ."
+	show
+	what
 }
 
-modifier()
+modify()
 {
-	clear
-	banner "Modifier la liste." "Affichage de la liste :"
+	 
+	banner "Modify list." "Printing list :"
 	cat -n $todo
-	question "Selectionner les lignes à supprimer.(par ordre décroissant)"
-	read -a listedate
-	echo ${listedate[*]}
-	for value in ${listedate[@]}
+	question "Select lines to remove.(descending order)"
+	read -a listdate
+	echo ${listdate[*]}
+	for value in ${listdate[@]}
 	do
 		$(sed -i "$value"'d' $todo )
 	done
-	clear
-	afficher
-	faire
+	 
+	show
+	what
 }
 
 begin()
 {
-	clear
+	 
 	update
-	afficher
-	faire
+	show
+	what
 }
 
-#début du script
-begin
+#starting script
+if [ -f "$todo" ]
+then
+	begin
+else
+	touch $todo
+	echo "[$today]" >> $todo
+	begin
+fi
