@@ -25,20 +25,20 @@ update()
 		valuetest=$(($(date -d $value +%s) - $day)) 
 		if [ $valuetest -eq 0 ]
 		then
-			ligne=$(grep -n $value $todo | cut -c1-1)
-			$(sed -i "$ligne"'i (today)' $todo)
-			if [ $ligne -gt 1 ]
+			line=$(grep -n $value $todo | cut -c1-1)
+			$(sed -i "$line"'i (today)' $todo)
+			if [ $line -gt 1 ]
 			then
-				$(sed -i "$ligne"',$!d' $todo)
+				$(sed -i "$line"',$!d' $todo)
 			fi
 			break
 		elif [ $valuetest -gt 0 ]
 		then
-			ligne=$(grep -n $value $todo | cut -c1-1)
-			$(sed -i "$ligne"'i (days to come)' $todo)
-			if [ $ligne -gt 1 ]
+			line=$(grep -n $value $todo | cut -c1-1)
+			$(sed -i "$line"'i (days to come)' $todo)
+			if [ $line -gt 1 ]
 			then
-				$(sed -i "$ligne"',$!d' $todo)
+				$(sed -i "$line"',$!d' $todo)
 			fi
 			break
 		fi
@@ -72,7 +72,6 @@ what()
 
 add()
 {
-	 
 	show
 	banner "Adding an event ."
 	question "Limit date ?(MM-DD)"
@@ -100,19 +99,18 @@ add()
 			valuetest=$(( $(date -d $value +%s) - $(date -d $limit +%s) )) 
 			if [ $valuetest -gt 0 ]
 			then
-				ligne=$(grep -n $value $todo | awk -F ':' '{print $1}')
-				$(sed -i "$ligne"'i'"[$limit]\n-$addtolist" $todo)
+				line=$(grep -n $value $todo | awk -F ':' '{print $1}')
+				$(sed -i "$line"'i'"[$limit]\n-$addtolist" $todo)
 				break
 			elif [ $valuetest -eq 0 ]
 			then
-				ligne=$(grep -n $value $todo | awk -F ':' '{print $1}')
-				$(sed -i "$ligne"'a'"-$addtolist" $todo)
+				line=$(grep -n $value $todo | awk -F ':' '{print $1}')
+				$(sed -i "$line"'a'"-$addtolist" $todo)
 				break
 			fi
 		done
 	fi
 	
-	 
 	banner "Event added ."
 	show
 	what
@@ -120,7 +118,6 @@ add()
 
 modify()
 {
-	 
 	banner "Modify list." "Printing list :"
 	cat -n $todo
 	question "Select lines to remove.(descending order)"
@@ -137,7 +134,6 @@ modify()
 
 begin()
 {
-	 
 	update
 	show
 	what
@@ -148,7 +144,6 @@ if [ -f "$todo" ]
 then
 	begin
 else
-	touch $todo
 	echo "[$today]" >> $todo
 	begin
 fi
