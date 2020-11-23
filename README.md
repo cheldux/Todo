@@ -18,5 +18,6 @@ git clone https://github.com/cheldux/Todo
 ```
 After that just do: 
 ```
+chmod +x todo.sh
 ./todo.sh
 ```
