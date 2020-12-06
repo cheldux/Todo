@@ -2,7 +2,7 @@
 
 #declaring variables
 #modify todo to change path of the file (e.g. $HOME/todo)
-todo=$HOME/.todo
+todo=$HOME/.config/i3/todo
 today=$(date +%Y-%m-%d)
 day=$(date -d $today +%s)
 year=$(date +%Y)
@@ -59,9 +59,11 @@ what()
 	
 	case $modif in
 		a)
+			clear
 			add
 			;;
 		m)
+			clear
 			modify
 			;;
 		*)
@@ -111,6 +113,7 @@ add()
 		done
 	fi
 	
+	clear
 	banner "Event added ."
 	show
 	what
@@ -127,7 +130,8 @@ modify()
 	do
 		$(sed -i "$value"'d' $todo )
 	done
-	 
+
+	clear
 	show
 	what
 }
